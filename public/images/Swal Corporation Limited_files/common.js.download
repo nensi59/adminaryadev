@@ -1,0 +1,252 @@
+
+// document ready function
+$(document).ready(function(){
+	
+	var homeOwl = $(".banner-slider");
+		homeOwl.owlCarousel({
+		items:1,
+		dot: true,
+		smartSpeed: 1000,
+		autoplay: true,
+		loop: true,
+		nav: true,
+	});
+
+	
+
+  if($(window).width() > 767){
+  	$("#large-img").elevateZoom({
+	    //zoomType: "inner",
+	    cursor: "move",
+	    zoomWindowFadeIn: 500,
+	    zoomWindowFadeOut: 750
+	  }); 
+  }
+
+
+	var valSlider = $(".value-slider");
+		valSlider.owlCarousel({		
+		dot: false,
+		smartSpeed: 1000,
+		autoplay: true,
+		loop: true,
+		nav: true,		
+		
+		responsive:{
+				0:{
+					items: 1,
+					margin: 15,
+					stagePadding: 20,
+				},
+				640:{
+					items: 1,
+					margin: 50,
+					stagePadding: 100,
+				},
+				1279:{
+					items: 2,
+					margin: 50,
+					stagePadding: 150,
+				},
+				1500:{
+					items: 2,
+					margin: 100,
+					stagePadding: 150,
+				},
+				2000:{
+					items: 3,
+					margin: 100,
+					stagePadding: 150,
+				}
+		}
+	});
+
+	$('.fancybox-media').fancybox({
+    openEffect  : 'none',
+    closeEffect : 'none',
+    helpers : {
+      media : {}
+    }
+  });
+
+
+	var testiOwl = $(".testi-slider");
+		testiOwl.owlCarousel({
+		items:1,
+		dot: true,
+		smartSpeed: 1000,
+		autoplay: true,
+		loop: true,
+		nav: true,
+	});
+	
+	
+	$('.fancybox-media').fancybox({
+		openEffect  : 'none',
+		closeEffect : 'none',
+		helpers : {
+			media : {}
+		}
+	});
+
+	$(".fancybox").fancybox({
+		openEffect	: 'none',
+		closeEffect	: 'none'
+	});
+
+
+
+	$(".select-product").click(function(){
+		$(".select-product-list").hide();
+		if($(this).next().is(':hidden')){
+			$(this).next().show();
+			$(this).find("i").children('img').attr("src","images/minus_icon.png");
+		}
+		return false;
+	})
+
+	$(".select-product-list li").click(function(){
+		var thisLi = $(this).text();
+		$(this).parent().prev(".select-product").children("span").text(thisLi);
+		$(this).parent().hide();
+		$(this).parent().prev(".select-product").find("i").children('img').attr("src","images/plus_icon.png")
+	})
+
+	 $(document).click(function() {
+      $(".select-product-list").hide();
+      $(".drop-select").find("i").children('img').attr("src","images/plus_icon.png")
+    });
+
+	$('.select-product-list').click(function(e){
+	  e.stopPropagation();
+	})
+
+
+
+	$(document).on("click", ".burger-menu", function(){
+		$(".nav-bar").slideToggle();
+		$(this).toggleClass("active");
+	})
+
+});
+
+
+
+// window load function
+$(window).load(function(){
+
+	
+	
+})
+
+/* JS By Anjali */
+function error_msg(data){
+    $(".text-danger" ).each(function( index ) {
+        $( this ).html("");
+    });
+    for(var key in data) 
+    {
+        $("#"+key+"_error").html(data[key]);
+    }
+}
+
+function showMsgPopup(title,text){
+    alert(text);
+}
+
+function career_submit(urls)
+{
+    var formdata = new FormData();
+    var flag = false;
+    var ins = document.getElementById('multiFiles').files.length;
+    for (var x = 0; x < ins; x++) {
+        formdata.append("files[]", document.getElementById('multiFiles').files[x]);
+        if(document.getElementById('multiFiles').files[x].size>1048576) {
+            $("#image_error").html("File size is greater than 1MB");
+            flag = true;
+        }
+    }
+    var other_data = $('form').serializeArray();
+    $.each(other_data,function(key,input){
+        formdata.append(input.name,input.value);
+    });
+    if(flag)
+        return false;
+        $('#loading').show();
+    $.ajax({
+        url : urls+"save_career.php",
+        type: "POST",
+        dataType: "json",
+        data : formdata,
+        contentType: false,
+        processData: false,
+        success: function(data, textStatus, jqXHR)
+        {
+            $('#loading').hide();
+            if(data.status=='failure')
+            {
+                error_msg(data.error);
+            }
+            else
+            {
+                if(data.status=='error'){
+                    showMsgPopup(data.status,data.data);
+                }
+                else{
+                    if (data.status == 'success') {
+                        $('#careerForm')[0].reset();
+                        $("#careerSuccess").html('Message send successfully.');
+                        $('.text-danger').html('');
+                    }else{
+                        showMsgPopup(data.status,data.data);
+                        return false;
+                    }
+                }
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+
+        }
+    });
+}
+
+function submitSearch() {
+	if($("[name='keyword']").val().trim()=="") {
+		$(".searh-error").show();
+	} else {
+		$(".searh-error").hide();
+		$("#search-form").submit();
+	}
+}
+
+$(document).ready(function(){
+	$(".product-search").click(function() {
+		$(".search-form-div").toggle();
+	});
+
+	if (typeof isSearchPage !== 'undefined' && isSearchPage) {
+		$(document).scroll(function(){
+		 	if(isDataAva && isRequestComplete) {
+		 		isRequestComplete = false;
+		 		page_no++;
+				$.ajax({
+					url : ajaxUrl+"search_list.php",
+					type: "POST",
+					data : {page_no: page_no, keyword: keyword},
+					success: function(data, textStatus, jqXHR) {
+						if(data.trim() == '')
+							isDataAva = false;
+						else {
+							$("#productList").append(data);
+							$(document).scroll();
+						}
+						isRequestComplete = true;
+					}
+
+				});
+		 	}
+		});
+	}
+});
+/* JS By Anjali */
