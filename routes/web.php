@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(["middleware" => "auth"],function(){
     Route::resource('/','add_product');
+     Route::resource('insert_product','add_product');
     Route::resource('view_product','view_product_admin');
   
 });
